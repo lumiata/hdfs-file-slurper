@@ -27,91 +27,97 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.ReentrantLock;
 
 public class FileSystemManager {
-    private static Log log = LogFactory.getLog(FileSystemManager.class);
+	private static Log log = LogFactory.getLog(FileSystemManager.class);
 
-    private final Config config;
+	private final Config config;
 
-    private final ReentrantLock inboundDirLock = new ReentrantLock();
+	private final ReentrantLock inboundDirLock = new ReentrantLock();
 
-    public FileSystemManager(Config config) throws IOException {
-      this.config = config;
-    }
+	public FileSystemManager(Config config) throws IOException {
+		this.config = config;
+	}
 
-    public FileStatus pollForInboundFile(TimeUnit unit, long period) throws IOException, InterruptedException {
-        FileStatus fs;
-        // we should optimize fo the case where the FileSystem is a local file sytem,
-        // in which case we could use Java 7's WatchService
-        //
-        while ((fs = getInboundFile()) == null) {
-            unit.sleep(period);
-        }
-        return fs;
-    }
+	public FileStatus pollForInboundFile(TimeUnit unit, long period) throws IOException, InterruptedException {
+		FileStatus fs;
+		// we should optimize fo the case where the FileSystem is a local file
+		// sytem,
+		// in which case we could use Java 7's WatchService
+		//
+		while ((fs = getInboundFile()) == null) {
+			unit.sleep(period);
+		}
+		return fs;
+	}
 
-    public FileStatus getInboundFile() throws IOException, InterruptedException {
-        try {
-            inboundDirLock.lockInterruptibly();
-            for (FileStatus fs : config.getSrcFs().listStatus(config.getSrcDir())) {
-                if (!fs.isDir()) {
-                    if (fs.getPath().getName().startsWith(".")) {
-                        log.debug("Ignoring hidden file '" + fs.getPath() + "'");
-                        continue;
-                    }
+	public FileStatus getInboundFile() throws IOException, InterruptedException {
+		try {
+			inboundDirLock.lockInterruptibly();
+			for (FileStatus fs : config.getSrcFs().listStatus(config.getSrcDir())) {
+				if (!fs.isDir()) {
+					if (fs.getPath().getName().startsWith(".")) {
+						log.debug("event#Ignoring hidden file '" + fs.getPath() + "'");
+						continue;
+					}
 
-                    // move file into work directory
-                    //
-                    Path workPath = new Path(config.getWorkDir(), fs.getPath().getName());
-                  config.getSrcFs().rename(fs.getPath(), workPath);
+					// move file into work directory
+					//
+					Path workPath = new Path(config.getWorkDir(), fs.getPath().getName());
+					config.getSrcFs().rename(fs.getPath(), workPath);
 
-                    return config.getSrcFs().getFileStatus(workPath);
-                }
-            }
-            return null;
-        } finally {
-            inboundDirLock.unlock();
-        }
-    }
+					return config.getSrcFs().getFileStatus(workPath);
+				}
+			}
+			return null;
+		} finally {
+			inboundDirLock.unlock();
+		}
+	}
 
-    public boolean fileCopyComplete(FileStatus fs) throws IOException {
-        boolean success;
-        if (config.isRemove()) {
-            log.info("File copy successful, deleting source " + fs.getPath());
-            success = config.getSrcFs().delete(fs.getPath(), false);
-            if(!success) {
-                log.info("File deletion unsuccessful");
-            }
-        } else {
-            Path completedPath = new Path(config.getCompleteDir(), fs.getPath().getName());
-            log.info("File copy successful, moving source " + fs.getPath() + " to completed file " + completedPath);
-            success = config.getSrcFs().rename(fs.getPath(), completedPath);
-            if(!success) {
-                log.info("File move unsuccessful");
-            }
-        }
-        return success;
-    }
+	public boolean fileCopyComplete(FileStatus fs) throws IOException {
+		boolean success;
+		String filenameBatchidDelimiter = config.getFileNameBatchIdDelimiter();
+		String batchId = fs.getPath().toString().substring(
+				fs.getPath().toString().lastIndexOf(filenameBatchidDelimiter) + 1, fs.getPath().toString().length());
+		if (config.isRemove()) {
+			log.info("event#File copy successful, deleting source " + fs.getPath() + "$batchId#" + batchId);
+			success = config.getSrcFs().delete(fs.getPath(), false);
+			if (!success) {
+				log.info("event#File deletion unsuccessful" + "$batchId#" + batchId);
+			}
+		} else {
+			Path completedPath = new Path(config.getCompleteDir(), fs.getPath().getName());
+			log.info("event#File copy successful, moving source " + fs.getPath() + " to completed file " + completedPath
+					+ "$batchId#" + batchId);
+			success = config.getSrcFs().rename(fs.getPath(), completedPath);
+			if (!success) {
+				log.info("event#File move unsuccessful"+"$batchId#"+batchId);
+			}
+		}
+		return success;
+	}
 
-    public boolean fileCopyError(FileStatus fs) throws IOException, InterruptedException {
-        Path errorPath = new Path(config.getErrorDir(), fs.getPath().getName());
-        log.info("Found file in work directory, moving " + fs.getPath() + " to error file " + errorPath);
-        return config.getSrcFs().rename(fs.getPath(), errorPath);
-    }
+	public boolean fileCopyError(FileStatus fs) throws IOException, InterruptedException {
+		Path errorPath = new Path(config.getErrorDir(), fs.getPath().getName());
+		log.info("event#Found file in work directory, moving " + fs.getPath() + " to error file " + errorPath);
+		return config.getSrcFs().rename(fs.getPath(), errorPath);
+	}
 
-    public void moveWorkFilesToError() throws IOException, InterruptedException {
-        for (FileStatus fs : config.getSrcFs().listStatus(config.getWorkDir())) {
-            if (!fs.isDir()) {
-                if (fs.getPath().getName().startsWith(".")) {
-                    log.debug("Ignoring hidden file '" + fs.getPath() + "'");
-                    continue;
-                }
+	public void moveWorkFilesToError() throws IOException, InterruptedException {
+		for (FileStatus fs : config.getSrcFs().listStatus(config.getWorkDir())) {
+			if (!fs.isDir()) {
+				if (fs.getPath().getName().startsWith(".")) {
+					log.debug("event#Ignoring hidden file '" + fs.getPath() + "'");
+					continue;
+				}
 
-                fileCopyError(fs);
-            }
-        }
-    }
+				fileCopyError(fs);
+			}
+		}
+	}
 
-    public Path getStagingFile(FileStatus srcFileStatus, Path destFile) {
-        int hash = Math.abs((srcFileStatus.getPath().toString() + destFile.toString()).hashCode() + new Random().nextInt());
-        return new Path(config.getDestStagingDir(), String.valueOf(hash));
-    }
+	public Path getStagingFile(FileStatus srcFileStatus, Path destFile) {
+		int hash = Math
+				.abs((srcFileStatus.getPath().toString() + destFile.toString()).hashCode() + new Random().nextInt());
+		return new Path(config.getDestStagingDir(), String.valueOf(hash));
+	}
 }

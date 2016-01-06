@@ -52,7 +52,8 @@ public class Configurator {
     SCRIPT,
     THREADS,
     WORK_SCRIPT,
-    POLL_MILLIS
+    POLL_MILLIS,
+    FILE_NAME_BATCH_ID_DELIMITER
   }
 
   private static Log log = LogFactory.getLog(Configurator.class);
@@ -122,6 +123,9 @@ public class Configurator {
     c.setVerify(isOptionEnabled(props, ConfigNames.VERIFY));
     c.setNumThreads(getConfigValueAsInt(props, ConfigNames.THREADS, 1));
     c.setPollSleepPeriodMillis(getConfigValueAsInt(props, ConfigNames.POLL_MILLIS, 1000));
+    
+    // set batch id delimiter
+    c.setFileNameBatchIdDelimiter(getConfigValue(props, ConfigNames.FILE_NAME_BATCH_ID_DELIMITER));
 
     return c;
   }

@@ -45,14 +45,14 @@ public class Slurper extends Configured implements Tool {
   private void printUsageAndExit(Options options, int exitCode) {
     HelpFormatter formatter = new HelpFormatter();
     formatter.printHelp("Slurper", options, true);
-    log.info("Exiting");
+    log.info("event#Exiting");
     System.exit(exitCode);
   }
 
   private void printErrorAndExit(String s, int exitCode) {
-    log.error(s);
+    log.error("event#"+s);
     System.err.println(s);
-    log.info("Exiting");
+    log.info("event#Exiting");
     System.exit(exitCode);
   }
 
@@ -66,7 +66,7 @@ public class Slurper extends Configured implements Tool {
     try {
       commandLine = new PosixParser().parse(options, args, false);
     } catch (ParseException e) {
-      log.error("Could not parse command line args: " + e.getMessage());
+      log.error("event#Could not parse command line args: " + e.getMessage());
       System.err.println("Could not parse command line args: " + e.getMessage());
       printUsageAndExit(options, 1);
       return;
@@ -122,7 +122,7 @@ public class Slurper extends Configured implements Tool {
 
     FileSystemManager fileSystemManager = new FileSystemManager(config);
 
-    log.info("Moving any files in work directory to error directory");
+    log.info("event#Moving any files in work directory to error directory");
 
     fileSystemManager.moveWorkFilesToError();
 
@@ -139,24 +139,24 @@ public class Slurper extends Configured implements Tool {
       public void run() {
         try {
           if (programmaticShutdown.get()) {
-            log.info("JVM shutting down");
+            log.info("event#JVM shutting down");
           } else {
-            log.info("External process signalled JVM shutdown, shutting down threads.");
-            log.info("This may take a few minutes until we let the threads complete ");
-            log.info("the current file being copied.");
+            log.info("event#External process signalled JVM shutdown, shutting down threads.");
+            log.info("event#This may take a few minutes until we let the threads complete ");
+            log.info("event#the current file being copied.");
             for (WorkerThread workerThread : workerThreads) {
               workerThread.shutdown();
             }
-            log.info("Threads dead");
+            log.info("event#Threads dead");
           }
         } catch (Throwable t) {
-          log.error("Hit snag in shutdown hook", t);
+          log.error("event#Hit snag in shutdown hook", t);
         }
 
       }
     });
 
-    log.info("Running");
+    log.info("event#Running");
 
     for (WorkerThread workerThread : workerThreads) {
       workerThread.join();
@@ -189,7 +189,7 @@ public class Slurper extends Configured implements Tool {
       run();
       return 0;
     } catch (Throwable t) {
-      log.error("Caught exception in main()", t);
+      log.error("event#Caught exception in main()", t);
       t.printStackTrace();
       return 1000;
     }

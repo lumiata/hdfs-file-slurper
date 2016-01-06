@@ -23,185 +23,194 @@ import org.apache.hadoop.io.compress.CompressionCodec;
 
 public class Config {
 
-  private String datasource;
-  private CompressionCodec codec;
-  private boolean createLzopIndex;
-  private Path srcDir;
-  private Path workDir;
-  private Path completeDir;
-  private Path errorDir;
-  private Path destDir;
-  private Path destStagingDir;
-  private String script;
-  private String workScript;
-  private boolean remove;
-  private boolean verify;
-  private int numThreads;
-  private long pollSleepPeriodMillis;
-  FileSystem srcFs;
-  FileSystem destFs;
-  Configuration config;
+	private String datasource;
+	private CompressionCodec codec;
+	private boolean createLzopIndex;
+	private Path srcDir;
+	private Path workDir;
+	private Path completeDir;
+	private Path errorDir;
+	private Path destDir;
+	private Path destStagingDir;
+	private String script;
+	private String workScript;
+	private boolean remove;
+	private boolean verify;
+	private int numThreads;
+	private long pollSleepPeriodMillis;
+	FileSystem srcFs;
+	FileSystem destFs;
+	Configuration config;
+	private String fileNameBatchIdDelimiter;
 
+	public String getDatasource() {
+		return datasource;
+	}
 
-  public String getDatasource() {
-    return datasource;
-  }
+	public Config setDatasource(String datasource) {
+		this.datasource = datasource;
+		return this;
+	}
 
-  public Config setDatasource(String datasource) {
-    this.datasource = datasource;
-    return this;
-  }
+	public CompressionCodec getCodec() {
+		return codec;
+	}
 
-  public CompressionCodec getCodec() {
-    return codec;
-  }
+	public Config setCodec(CompressionCodec codec) {
+		this.codec = codec;
+		return this;
+	}
 
-  public Config setCodec(CompressionCodec codec) {
-    this.codec = codec;
-    return this;
-  }
+	public boolean isCreateLzopIndex() {
+		return createLzopIndex;
+	}
 
-  public boolean isCreateLzopIndex() {
-    return createLzopIndex;
-  }
+	public Config setCreateLzopIndex(boolean createLzopIndex) {
+		this.createLzopIndex = createLzopIndex;
+		return this;
+	}
 
-  public Config setCreateLzopIndex(boolean createLzopIndex) {
-    this.createLzopIndex = createLzopIndex;
-    return this;
-  }
+	public Path getSrcDir() {
+		return srcDir;
+	}
 
-  public Path getSrcDir() {
-    return srcDir;
-  }
+	public Config setSrcDir(Path srcDir) {
+		this.srcDir = srcDir;
+		return this;
+	}
 
-  public Config setSrcDir(Path srcDir) {
-    this.srcDir = srcDir;
-    return this;
-  }
+	public Path getWorkDir() {
+		return workDir;
+	}
 
-  public Path getWorkDir() {
-    return workDir;
-  }
+	public Config setWorkDir(Path workDir) {
+		this.workDir = workDir;
+		return this;
+	}
 
-  public Config setWorkDir(Path workDir) {
-    this.workDir = workDir;
-    return this;
-  }
+	public Path getCompleteDir() {
+		return completeDir;
+	}
 
-  public Path getCompleteDir() {
-    return completeDir;
-  }
+	public Config setCompleteDir(Path completeDir) {
+		this.completeDir = completeDir;
+		return this;
+	}
 
-  public Config setCompleteDir(Path completeDir) {
-    this.completeDir = completeDir;
-    return this;
-  }
+	public Path getErrorDir() {
+		return errorDir;
+	}
 
-  public Path getErrorDir() {
-    return errorDir;
-  }
+	public Config setErrorDir(Path errorDir) {
+		this.errorDir = errorDir;
+		return this;
+	}
 
-  public Config setErrorDir(Path errorDir) {
-    this.errorDir = errorDir;
-    return this;
-  }
+	public Path getDestDir() {
+		return destDir;
+	}
 
-  public Path getDestDir() {
-    return destDir;
-  }
+	public Config setDestDir(Path destDir) {
+		this.destDir = destDir;
+		return this;
+	}
 
-  public Config setDestDir(Path destDir) {
-    this.destDir = destDir;
-    return this;
-  }
+	public Path getDestStagingDir() {
+		return destStagingDir;
+	}
 
-  public Path getDestStagingDir() {
-    return destStagingDir;
-  }
+	public Config setDestStagingDir(Path destStagingDir) {
+		this.destStagingDir = destStagingDir;
+		return this;
+	}
 
-  public Config setDestStagingDir(Path destStagingDir) {
-    this.destStagingDir = destStagingDir;
-    return this;
-  }
+	public String getScript() {
+		return script;
+	}
 
-  public String getScript() {
-    return script;
-  }
+	public Config setScript(String script) {
+		this.script = script;
+		return this;
+	}
 
-  public Config setScript(String script) {
-    this.script = script;
-    return this;
-  }
+	public String getWorkScript() {
+		return workScript;
+	}
 
-  public String getWorkScript() {
-    return workScript;
-  }
+	public Config setWorkScript(String workScript) {
+		this.workScript = workScript;
+		return this;
+	}
 
-  public Config setWorkScript(String workScript) {
-    this.workScript = workScript;
-    return this;
-  }
+	public boolean isRemove() {
+		return remove;
+	}
 
-  public boolean isRemove() {
-    return remove;
-  }
+	public Config setRemove(boolean remove) {
+		this.remove = remove;
+		return this;
+	}
 
-  public Config setRemove(boolean remove) {
-    this.remove = remove;
-    return this;
-  }
+	public boolean isVerify() {
+		return verify;
+	}
 
-  public boolean isVerify() {
-    return verify;
-  }
+	public Config setVerify(boolean verify) {
+		this.verify = verify;
+		return this;
+	}
 
-  public Config setVerify(boolean verify) {
-    this.verify = verify;
-    return this;
-  }
+	public int getNumThreads() {
+		return numThreads;
+	}
 
-  public int getNumThreads() {
-    return numThreads;
-  }
+	public Config setNumThreads(int numThreads) {
+		this.numThreads = numThreads;
+		return this;
+	}
 
-  public Config setNumThreads(int numThreads) {
-    this.numThreads = numThreads;
-    return this;
-  }
+	public long getPollSleepPeriodMillis() {
+		return pollSleepPeriodMillis;
+	}
 
-  public long getPollSleepPeriodMillis() {
-    return pollSleepPeriodMillis;
-  }
+	public Config setPollSleepPeriodMillis(long pollSleepPeriodMillis) {
+		this.pollSleepPeriodMillis = pollSleepPeriodMillis;
+		return this;
+	}
 
-  public Config setPollSleepPeriodMillis(long pollSleepPeriodMillis) {
-    this.pollSleepPeriodMillis = pollSleepPeriodMillis;
-    return this;
-  }
+	public FileSystem getSrcFs() {
+		return srcFs;
+	}
 
-  public FileSystem getSrcFs() {
-    return srcFs;
-  }
+	public Config setSrcFs(FileSystem srcFs) {
+		this.srcFs = srcFs;
+		return this;
+	}
 
-  public Config setSrcFs(FileSystem srcFs) {
-    this.srcFs = srcFs;
-    return this;
-  }
+	public FileSystem getDestFs() {
+		return destFs;
+	}
 
-  public FileSystem getDestFs() {
-    return destFs;
-  }
+	public Config setDestFs(FileSystem destFs) {
+		this.destFs = destFs;
+		return this;
+	}
 
-  public Config setDestFs(FileSystem destFs) {
-    this.destFs = destFs;
-    return this;
-  }
+	public Configuration getConfig() {
+		return config;
+	}
 
-  public Configuration getConfig() {
-    return config;
-  }
+	public Config setConfig(Configuration config) {
+		this.config = config;
+		return this;
+	}
 
-  public Config setConfig(Configuration config) {
-    this.config = config;
-    return this;
-  }
+	public String getFileNameBatchIdDelimiter() {
+		return fileNameBatchIdDelimiter;
+	}
+
+	public void setFileNameBatchIdDelimiter(String fileNameBatchIdDelimiter) {
+		this.fileNameBatchIdDelimiter = fileNameBatchIdDelimiter;
+	}
+
 }
